@@ -8,4 +8,4 @@
 - DanSpeech har GPU-budget, som man måske kan få snablen issue
 - Kasper Junge: Google smider TPU efter forskning
 - Kom med litteraturstudie af kompleksitetshjælpende metoder
-- Automatic Relevance Determination: Skru på varians 
+- Automatic Relevance Determination: Skru på varians
