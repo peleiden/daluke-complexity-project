@@ -1,0 +1,58 @@
+# Script, der bygger pdf af bachelor
+# Se: https://github.com/marketplace/actions/github-action-for-latex og
+# https://github.com/marketplace/actions/github-pages
+name: pdfbot
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - report.tex
+      - preamble.tex
+      - imgs/*
+      - .github/workflows/pdfbot.yml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: pull ma boi
+        uses: actions/checkout@v2
+      - name: compile ma boi
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: report.tex
+      - name: generate ma boi
+        run: |
+          mkdir public
+          mv report.pdf public/report.pdf
+          cat > public/index.html <<EOL
+          <!doctype html>
+            <html>
+              <head>
+                <title>Compilation ${{github.run_number}}</title>
+              </head>
+              <body>
+                <p>
+                  <a href="https://peleiden.github.io/bug-free-guacamole/main.pdf">
+                    Compilation ${{ github.run_number }}
+                  </a>
+                </p>
+                <p>
+                  <a href="https://github.com/peleiden/bug-free-guacamole/blob/gh-pages/main.pdf">
+                     Direct link to GitHub blob of newest pdf
+                  </a>
+                </p>
+              </body>
+            </html>
+          EOL
+      - name: deploy ma boi
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: public
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
