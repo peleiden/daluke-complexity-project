@@ -12,7 +12,7 @@
 
 \graphicspath{{imgs/}{../imgs/}}
 
-\title{DaLUKE}
+\title{DaLUKE: Strengthening Danish NLP Using Weak Knowledge-Enhancement}
 \author{Søren Winkel Holm, Asger Laurits Schulz}
 \date{\today}
 \linespread{1.15}
@@ -24,11 +24,47 @@
 \maketitle
 
 \begin{abstract}
-    The abstract here is made out of abstract
+    \begin{itemize}
+        \item Fokusér på problemet med NLP i middelressourcesprog generelt
+        \item Dansk er et case study, hvor vi undersøger LUKE-arkitekturen og vidensenhancement generelt som mulig løsning
+        \item Inkludér reklame for kode
+    \end{itemize}
 \end{abstract}
+\section{Introduction}%
+\label{sec:Introduction}
+\begin{itemize}
+    \item Kort gennemgang af status i dansk NLP
+    \item Kort introduktion af LUKE + nævn andre vidensenhancement-metoder
+    \item Det mest generelle, motiverende spørgsmål: Hvad skal der til for at få det elegant LUKE-ideal til at virke med meget mere begrænset data?
+    \item Mindre ressourcestærkt sprog => mindre ressourcestærke anvendere, så fokus på lille model
+\end{itemize}
+
+\section{Methods}%
+\label{sec:Methods}
+\begin{itemize}
+    \item Data: Augmentering og forskellige kilder
+    \item Hovedmodel: Hvad var forskellig fra DaLUKE
+    \item Fremgangsmåde for træning
+    \item Lille model: Fremgangsmåde for destillering/pruning
+    \item Præsentér vores nye arkitektur til lavere entitetsdimension
+    \item Præsentér NER-opgaven
+\end{itemize}
 
 
-\noindent Example \cite{yamada2020luke}
+\section{Results}%
+\label{sec:Results}
+\begin{itemize}
+    \item Prætræningsperformance med forskellige modeller
+    \item NER-performance sammenlignet med dansk niveau
+\end{itemize}
+
+\section{Discussion}%
+\label{sec:Discussion}
+\begin{itemize}
+    \item Prætrænings-eksperimenter: Data, arkitektur og transferlæring kontrolleret
+    \item En smule undersøgelse af maskeret opgave/downstream fejl
+    \item Konklusioner: AI-succes bliver bestemt af nogle andre underliggende parametre i højressourcedomænet end i den dataknappe situation
+\end{itemize}
 
 % Smaller bib text
 \renewcommand*{\bibfont}{\normalfont\footnotesize}
