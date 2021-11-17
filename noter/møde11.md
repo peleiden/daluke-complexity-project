@@ -1,0 +1,15 @@
+- Al træning på HPC
+- Skriv noget af koden om til C
+- Prætræningseksperimenter
+    - Med/uden autoannotering
+    - RoBERTa base/large
+    - Reduceret entitetsdimensionalitet
+- Beskriv data i paper
+    - Fjernet CC
+    - Sider med unicode-fejl
+    - Vores egen Wikipedia-dump frem for det i DAGW
+- Tænk over, hvor paper skal sendes hen
+- LK undersøger hvem paper kunne skrives med
+- Kurset kan i princippet godt skubbes uformelt med et par uger
+- Nogle oplagte konferencer i januar
+- Co-referencing udover NER
