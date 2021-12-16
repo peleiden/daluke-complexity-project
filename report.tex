@@ -41,6 +41,7 @@
 
 \section{Methods}%
 \label{sec:Methods}
+
 \begin{itemize}
     \item Data: Augmentering og forskellige kilder
     \item Hovedmodel: Hvad var forskellig fra DaLUKE
@@ -50,6 +51,23 @@
     \item Præsentér NER-opgaven
 \end{itemize}
 
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+        \begin{tabular}{l|ll}
+            Name                & Data & Base Model\\
+            \hline
+            Control             & Da. Wiki. w. entity links, Da. Gigaword & RoBERTa Base \\
+            Auto-annotated      & Da. Wiki. w. entity links, Da. Gigaword with auto. entities & RoBERTa Base\\
+            Big model           & Da. Wiki. w. entity links, Da. Gigaword & RoBERTa Large\\
+            Low entity dim.     & Da. Wiki. w. entity links, Da. Gigaword & 252-dimensional ent., RoBERTa Base 
+        \end{tabular}
+    \caption{
+        Learning rate: \(1.2\ctp{-4}\), batch size: 8160 examples
+    }
+    \label{tab:experiments}
+\end{table}\noindent
 
 \section{Results}%
 \label{sec:Results}

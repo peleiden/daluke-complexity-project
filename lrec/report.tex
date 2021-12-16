@@ -1,0 +1,90 @@
+\documentclass[10pt, a4paper]{article}
+\usepackage{lrec2022} % this is the new LREC2022 Style
+\usepackage{multibib}
+\newcites{languageresource}{Language Resources}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{soul}
+% for eps graphics
+%%% References and Labels
+%%% Reference labels without a punctuation 
+% courtesy of Marc Schulder , uni Hamburg ****************
+\usepackage{titlesec}
+%\titleformat{\section}{\normalfont\large\bf\center}{\thesection.}{1em}{}
+\titleformat{\section}{\normalfont\large\bfseries\center}{\thesection.}{1em}{}
+\titleformat{\subsection}{\normalfont\SmallTitleFont\bfseries\raggedright}{\thesubsection.}{1em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\raggedright}{\thesubsubsection.}{1em}{}
+\renewcommand\thesection{\arabic{section}}
+\renewcommand\thesubsection{\thesection.\arabic{subsection}}
+\renewcommand\thesubsubsection{\thesubsection.\arabic{subsubsection}}
+%  ed 
+
+\usepackage{epstopdf}
+\usepackage[utf8]{inputenc}
+
+\usepackage{hyperref}
+\usepackage{xstring}
+
+\usepackage{color}
+
+\newcommand{\secref}[1]{\StrSubstitute{\getrefnumber{#1}}{.}{ }}
+
+\title{DaLUKE: Strengthening Danish NLP Using Weak Knowledge-Enhancement}
+
+\name{Søren Winkel Holm, Asger Laurits Schultz, ...} 
+
+\address{Technical University of Denmark, 2800 Kgs. Lyngby\\
+         \{s183911, s183912, ...\}@dtu.dk\\}
+
+
+\abstract{
+    t
+\newline \Keywords{NLP, Transformers, Entity-based Learning}
+}
+
+\begin{document}
+
+\maketitleabstract
+
+\section{Introduction}
+The use of emerging languages technologies in industry has grown with positive impact in bussines and society, but this impact is largest in high-resource languages such as English motivating a focus on developing diverse methods for languages with much less available textual data \cite{hedderich2021survey}.
+Languages such as Danish, with around 6 million speakers, fall in a size class where NLP ressources and an NLP tradition exist but with data of so limited magnitude that models such as large-scale transformers underperform.
+In such domains, recent advances in combining explicit modeling of language knowledge with flexible SOTA models can be the key to get closer to the glory of the English-speaking models.
+DaLUKE is such an attempt, using the general model idea of LUKE \cite{yamada2020luke} and adding custom solutions for the case of Danish to measure the potential and applicability of this combination.
+
+
+\subsection{Related Models}
+\paragraph{Knowledge-based Pretraining Augmentations}
+\begin{itemize}
+    \item KEPLER
+    \item WKLM
+    \item KALM
+    \item K-Adapter
+    \item KGpLM
+    \item KB-VLP
+    \item CoLAKE
+\end{itemize}
+\paragraph{Danish NLP}
+\begin{itemize}
+    \item DaBERT
+    \item DaCy
+\end{itemize}
+
+
+\section{Methods}
+
+\section{Results}
+
+\section{Discussion}
+
+\section{Bibliographical References}\label{reference}
+
+\bibliographystyle{lrec2022-bib}
+\bibliography{references}
+
+\section{Language Resource References}
+\label{lr:ref}
+\bibliographystylelanguageresource{lrec2022-bib}
+\bibliographylanguageresource{languageresource}
+
+\end{document}
