@@ -31,6 +31,7 @@
 \renewcommand\thesubsection{\thesection.\arabic{subsection}}
 \renewcommand\thesubsubsection{\thesubsection.\arabic{subsubsection}}
 %  ed 
+\newcommand{\softmax}{\operatorname{softmax}}
 
 \usepackage{epstopdf}
 \usepackage[utf8]{inputenc}
@@ -181,17 +182,13 @@ Formally, a sequency of $ m $ word token representations of dimension $ L $ and 
         |&&|
     \end{bmatrix} \in \RR^{l\times n}
 \end{align*}
-The attention score $ e_{ij} $ between two tokens $ i $ and $ j $ is calculated as
-\begin{equation*}
-    e_{ij} = \begin{cases}
-        \frac{\transpose{\mathbf x_j}\transpose{\mathbf K}\mathbf Q\mathbf x_i}{\sqrt{L}}&\text{$ i $ is word and $ j $ is word}\\
-        \frac{\transpose{\mathbf x_j}\transpose{\mathbf K}\mathbf Q_{w2e}\mathbf x_i}{\sqrt{l}}&\text{$ i $ is word and $ j $ is entity}\\
-        \frac{\transpose{\mathbf x_j}\transpose{\mathbf K_e}\mathbf Q_{e2w}\mathbf x_i}{\sqrt{L}}&\text{$ i $ is entity and $ j $ is word}\\
-        \frac{\transpose{\mathbf x_j}\transpose{\mathbf K_e}\mathbf Q_{e2e}\mathbf x_i}{\sqrt{l}}&\text{$ i $ is entity and $ j $ is entity}
-    \end{cases}
-\end{equation*}
-The attention scores are organized into four matrices and softmaxed row-wise to produce $ \mathbf A\in\RR^{m\times m}, \mathbf A_{w2e}\in\RR^{n\times m}, \mathbf A_{e2w}\in\RR^{m\times n} $, and $ \mathbf A_{e2e}\in\RR^{n\times n} $.
-
+The attention between the tokens are structured into four matrices (softmaxes are row-wise):
+\begin{align*}
+        &\mathbf A = \softmax\left(\frac{\transpose{\mathbf W}\transpose{\mathbf K}\mathbf Q\mathbf W}{\sqrt{L}}\right)\in\RR^{m\times m}\\
+        &\mathbf A_{w2e} = \softmax\left(\frac{\transpose{\mathbf E}\transpose{\mathbf K}\mathbf Q_{w2e}\mathbf W}{\sqrt{l}}\right)\in\RR^{n\times m}\\
+        &\mathbf A_{e2w} = \softmax\left(\frac{\transpose{\mathbf W}\transpose{\mathbf K_e}\mathbf Q_{e2w}\mathbf E}{\sqrt{L}}\right)\in\RR^{m\times n}\\
+        &\mathbf A_{e2e} = \softmax\left(\frac{\transpose{\mathbf E}\transpose{\mathbf K_e}\mathbf Q_{e2e}\mathbf E}{\sqrt{l}}\right)\in\RR^{n\times n}
+\end{align*}
 Finally, the contextualized representations, $ \mathbf W_{c}\in\RR^{L\times m} $ and $ \mathbf E_{c}\in\RR^{l\times n} $, are calculated as
 \begin{align*}
     &\transpose{\mathbf W_c} = \mathbf A\transpose{\mathbf W}\mathbf V
