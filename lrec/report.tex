@@ -94,9 +94,9 @@ The experiments are listed in table \ref{tab:pretraining-experiments}.
 %    TODO Make table fit within column
     \centering
     \footnotesize
-    \begin{tabular}{l|lcc}
+    \begin{tabular}{l|ccc}
         Experiment      &RoBERTa &Auto-annotated&Reduced entity	\\
-        &&entities&dimensionality\\\hline
+        name&version&entities&dimensionality\\\hline
         Baseline        &Base	& &	\\
         Base+auto       &Base	&$\checkmark$ &	\\
         Base+ent        &Base	& &$\checkmark$	\\
@@ -112,29 +112,36 @@ The experiments are listed in table \ref{tab:pretraining-experiments}.
     \centering
     \footnotesize
     \begin{tabular}{l|r}
-        Parameter&Value\\\hline
-        Batches&3,000\\
-        Batch size          &4,080	\\
-        Peak learning rate  &$ 10^{-4} $	\\
+        Parameter                           &Value\\\hline
+        Batches                             &3,000\\
+        Batch size                          &4,080\\
+        Peak learning rate                  &$ 10^{-4} $\\
         Learning rate warmup proportion     &6\pro\\
-        ...&...
+        Entity embedding size               &256\\
+        AdamW weight decay                  &0.01\\
+        Word masking probability            &15\pro\\
+        Word unmasking probability          &10\pro\\
+        Random word replacement probability &10\pro\\
+        Entity masking probability          &15\pro
     \end{tabular}
-    \caption{Hyperparameters used for all pretraining experiments.}
+    \caption{Hyperparameters for pretraining experiments.}
     \label{tab:pretraining-hyperparameters}
 \end{table}\noindent
 
 \paragraph{Dataset}
-Something something dagw
+The pretraining comes from two sources: The Danish Wikipedia and the Danish Gigaword Corpus (DAGW) \cite{derc2021giga}.
+DaLUKE follows LUKE's pretraining task, which is an extension of BERT's masked language modelling \cite{devlin2019bert} \cite{yamada2020luke}.
+For this, both a large text corpus and entity annotations are needed.
+While the Danish Wikipedia is rather limited, it does contain entity annotations unlike DAGW.
+Part of Wikipedia is included in DAGW, but without annotations, so this part of DAGW is replaced by the Danish Wikipedia with annotations (downloaded Sep. 21st 2021).
+Special articles were removed from Wikipedia -- most notably category and image pages.
 
-Removed CC and manually added wiki
-
-Wikipedia dump from sep. 1st.
-
-Removed special articles
+Furthermore, DAGW also contains a subset of the Common Crawl \cite{cc}.
+This was found to be of relatively low quality and so was removed.
 
 \paragraph{Auto-annotated entities}
 As with most low-resource languages, the Danish Wikipedia fairly small, and it is the only source of entity labels in the dataset.
-While the dataset contains more than 900 million words, the entities number only 4.7 million, or about one entity per 200 words.
+Even though the full dataset contains more than 900 million words, the entities number only 4.7 million, or about one entity per 200 words.
 Auto-annotation is an attempt to remedy this.
 Using the entity vocabulary from Wikipedia, at every word start in the dataset it is checked if the next $ n $ characters match an entity (ignoring casing).
 If so, all words covered, whole or partially, by the characters, and the cursor jumps to the next word start, where the process is repeated.
@@ -182,7 +189,7 @@ Formally, a sequency of $ m $ word token representations of dimension $ L $ and 
         |&&|
     \end{bmatrix} \in \RR^{l\times n}
 \end{align*}
-The attention between the tokens are structured into four matrices (softmaxes are row-wise):
+The attention between the tokens are structured into four matrices, with softmax being applied row-wise:
 \begin{align*}
         &\mathbf A = \softmax\left(\frac{\transpose{\mathbf W}\transpose{\mathbf K}\mathbf Q\mathbf W}{\sqrt{L}}\right)\in\RR^{m\times m}\\
         &\mathbf A_{w2e} = \softmax\left(\frac{\transpose{\mathbf E}\transpose{\mathbf K}\mathbf Q_{w2e}\mathbf W}{\sqrt{l}}\right)\in\RR^{n\times m}\\
@@ -202,6 +209,7 @@ These biases do not change any of the dimensionality considerations and have thu
 \section{Results}
 
 \section{Discussion}
+%Self-attention går i stykker pga. nødvendig transponering
 
 \section{Bibliographical References}\label{reference}
 
