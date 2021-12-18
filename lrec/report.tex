@@ -112,6 +112,7 @@ The experiments are listed in table \ref{tab:pretraining-experiments}.
     \footnotesize
     \begin{tabular}{l|r}
         Parameter&Value\\\hline
+        Batches&3,000\\
         Batch size          &4,080	\\
         Peak learning rate  &$ 10^{-4} $	\\
         Learning rate warmup proportion     &6\pro\\
@@ -140,12 +141,12 @@ To work, all $ n $ in an interval need to be checked.
 The lower bound is set to 5 to prevent too many wrong matches and the upper bound to 48 to limit runtime.
 While this algorithm is rather crude, it does increase the number of entities to 115 million.
 When inspecting some of the annotations, very few incorrect ones were found.
-An drawback of this method is that the characters need to match one-to-one, so there will be some number of entities that are not annotated.
+An drawback of this method is that the characters need to match one-to-one, so there will be entities that are not annotated.
 
 \paragraph{Reduced entity dimensionality}
 LUKE models words and entities in the same $ L $ dimensional latent space \cite{yamada2020luke}.
 However, due to the lower number of entities and the simpler structure compared to words, we propose modelling them in a lower, $ l $ dimensional latent space.
-This requires adding some additional matrices in the attention blocks compared to LUKE and modifying others, with the total number of parameters dropping.
+This requires adding some additional matrices in the attention blocks compared to LUKE and modifying others, causing the total number of parameters to drop (assuming that $ L $ is sufficiently larger than $ l $).
 Tabel \ref{tab:mats} shows all parameter matrices in LUKE and DaLUKE.
 \begin{table}[H]
     \centering
@@ -153,20 +154,53 @@ Tabel \ref{tab:mats} shows all parameter matrices in LUKE and DaLUKE.
 %    TODO Maybe move to appendix?
     \begin{tabular}{l|c|c}
         Matrix&Dimension in LUKE&Dimension in DaLUKE\\\hline
-        $ Q $&$ L\times L $&$ L\times L $\\
-        $ Q_{w2e} $&$ L\times L $&$ L\times l $\\
-        $ Q_{e2w} $&$ L\times L $&$ l\times L $\\
-        $ Q_{e2e} $&$ L\times L $&$ l\times l $\\
-        $ K $&$ L\times L $&$ L\times L $\\
-        $ K_e $&&$ l\times l $\\
-        $ V $&$ L\times L $&$ L\times L $\\
-        $ V_{w2e} $&&$ L\times l $\\
-        $ V_{e2w} $&&$ l\times L $\\
-        $ V_{e2e} $&&$ l\times l $\\
+        $ \mathbf Q $&$ L\times L $&$ L\times L $\\
+        $ \mathbf Q_{w2e} $&$ L\times L $&$ L\times l $\\
+        $ \mathbf Q_{e2w} $&$ L\times L $&$ l\times L $\\
+        $ \mathbf Q_{e2e} $&$ L\times L $&$ l\times l $\\
+        $ \mathbf K $&$ L\times L $&$ L\times L $\\
+        $ \mathbf K_e $&&$ l\times l $\\
+        $ \mathbf V $&$ L\times L $&$ L\times L $\\
+        $ \mathbf V_{w2e} $&&$ L\times l $\\
+        $ \mathbf V_{e2w} $&&$ l\times L $\\
+        $ \mathbf V_{e2e} $&&$ l\times l $\\
     \end{tabular}
     \caption{Comparison of the matrix dimensions in the transformer blocks of LUKE and DaLUKE.}
     \label{tab:mats}
 \end{table}\noindent
+Formally, a sequency of $ m $ word token representations of dimension $ L $ and $ n $ entity token representations of dimension $ l $ is structured as two matrices:
+\begin{align*}
+    &\mathbf W = \begin{bmatrix}
+        |&&|\\
+        \mathbf x_1&\cdots&\mathbf x_m\\
+        |&&|
+    \end{bmatrix} \in \RR^{L\times m}\\
+    &\mathbf E = \begin{bmatrix}
+        |&&|\\
+        \mathbf x_{m+1}&\cdots&\mathbf x_{m+n}\\
+        |&&|
+    \end{bmatrix} \in \RR^{l\times n}
+\end{align*}
+The attention score $ e_{ij} $ between two tokens $ i $ and $ j $ is calculated as
+\begin{equation*}
+    e_{ij} = \begin{cases}
+        \frac{\transpose{\mathbf x_j}\transpose{\mathbf K}\mathbf Q\mathbf x_i}{\sqrt{L}}&\text{$ i $ is word and $ j $ is word}\\
+        \frac{\transpose{\mathbf x_j}\transpose{\mathbf K}\mathbf Q_{w2e}\mathbf x_i}{\sqrt{l}}&\text{$ i $ is word and $ j $ is entity}\\
+        \frac{\transpose{\mathbf x_j}\transpose{\mathbf K_e}\mathbf Q_{e2w}\mathbf x_i}{\sqrt{L}}&\text{$ i $ is entity and $ j $ is word}\\
+        \frac{\transpose{\mathbf x_j}\transpose{\mathbf K_e}\mathbf Q_{e2e}\mathbf x_i}{\sqrt{l}}&\text{$ i $ is entity and $ j $ is entity}
+    \end{cases}
+\end{equation*}
+The attention scores are organized into four matrices and softmaxed row-wise to produce $ \mathbf A\in\RR^{m\times m}, \mathbf A_{w2e}\in\RR^{n\times m}, \mathbf A_{e2w}\in\RR^{m\times n} $, and $ \mathbf A_{e2e}\in\RR^{n\times n} $.
+
+Finally, the contextualized representations, $ \mathbf W_{c}\in\RR^{L\times m} $ and $ \mathbf E_{c}\in\RR^{l\times n} $, are calculated as
+\begin{align*}
+    &\transpose{\mathbf W_c} = \mathbf A\transpose{\mathbf W}\mathbf V
+        + \mathbf A_{e2w}\transpose{\mathbf E}\mathbf V_{e2w} \\
+        &\transpose{\mathbf E_c} = \mathbf A_{e2e}\transpose{\mathbf E}\mathbf V_{e2e}
+        + \mathbf A_{w2e}\transpose{\mathbf W}\mathbf V_{w2e}
+\end{align*}
+Notice that while the calculations in the attention blocks here are expressed as purely linear, e.g. $ \mathbf A\mathbf x $, all of the matrices also have a bias term, e.g. $ \mathbf A\mathbf x+\mathbf b $.
+These biases do not change any of the dimensionality considerations and have thus been left out for simplicity.
 
 \section{Results}
 
