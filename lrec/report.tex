@@ -5,6 +5,19 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{soul}
+\usepackage{tikz}
+\usepackage{}
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;} 
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{changepage}
+\usepackage[nottoc, numbib]{tocbibind}
+\usepackage{lastpage}
+\usepackage{setspace}
+\usepackage[bottom]{footmisc}
+\usepackage{MediocreMike}
+
 % for eps graphics
 %%% References and Labels
 %%% Reference labels without a punctuation 
@@ -72,6 +85,88 @@ DaLUKE is such an attempt, using the general model idea of LUKE \cite{yamada2020
 
 
 \section{Methods}
+
+\subsection{Pretraining}
+Six pretrained models are produced using various combinations of three variables.
+The experiments are listed in table \ref{tab:pretraining-experiments}.
+\begin{table}[H]
+%    TODO Make table fit within column
+    \centering
+    \footnotesize
+    \begin{tabular}{l|lcc}
+        Experiment      &RoBERTa &Auto-annotated&Reduced entity	\\
+        &&entities&dimensionality\\\hline
+        Baseline        &Base	& &	\\
+        Base+auto       &Base	&$\checkmark$ &	\\
+        Base+ent        &Base	& &$\checkmark$	\\
+        Base+auto+ent   &Base	&$\checkmark$ &$\checkmark$	\\
+        Large           &Large	& \\
+        Large+auto      &Large   &$\checkmark$   &
+    \end{tabular}
+    \caption{Pretraining experiments.
+    Hyperparameters were kept constant across all and are listed in table \ref{tab:pretraining-hyperparameters}.}
+    \label{tab:pretraining-experiments}
+\end{table}\noindent
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{l|r}
+        Parameter&Value\\\hline
+        Batch size          &4,080	\\
+        Peak learning rate  &$ 10^{-4} $	\\
+        Learning rate warmup proportion     &6\pro\\
+        ...&...
+    \end{tabular}
+    \caption{Hyperparameters used for all pretraining experiments.}
+    \label{tab:pretraining-hyperparameters}
+\end{table}\noindent
+
+\paragraph{Dataset}
+Something something dagw
+
+Removed CC and manually added wiki
+
+Wikipedia dump from sep. 1st.
+
+Removed special articles
+
+\paragraph{Auto-annotated entities}
+As with most low-resource languages, the Danish Wikipedia fairly small, and it is the only source of entity labels in the dataset.
+While the dataset contains more than 900 million words, the entities number only 4.7 million, or about one entity per 200 words.
+Auto-annotation is an attempt to remedy this.
+Using the entity vocabulary from Wikipedia, at every word start in the dataset it is checked if the next $ n $ characters match an entity (ignoring casing).
+If so, all words covered, whole or partially, by the characters, and the cursor jumps to the next word start, where the process is repeated.
+To work, all $ n $ in an interval need to be checked.
+The lower bound is set to 5 to prevent too many wrong matches and the upper bound to 48 to limit runtime.
+While this algorithm is rather crude, it does increase the number of entities to 115 million.
+When inspecting some of the annotations, very few incorrect ones were found.
+An drawback of this method is that the characters need to match one-to-one, so there will be some number of entities that are not annotated.
+
+\paragraph{Reduced entity dimensionality}
+LUKE models words and entities in the same $ L $ dimensional latent space \cite{yamada2020luke}.
+However, due to the lower number of entities and the simpler structure compared to words, we propose modelling them in a lower, $ l $ dimensional latent space.
+This requires adding some additional matrices in the attention blocks compared to LUKE and modifying others, with the total number of parameters dropping.
+Tabel \ref{tab:mats} shows all parameter matrices in LUKE and DaLUKE.
+\begin{table}[H]
+    \centering
+    \footnotesize
+%    TODO Maybe move to appendix?
+    \begin{tabular}{l|c|c}
+        Matrix&Dimension in LUKE&Dimension in DaLUKE\\\hline
+        $ Q $&$ L\times L $&$ L\times L $\\
+        $ Q_{w2e} $&$ L\times L $&$ L\times l $\\
+        $ Q_{e2w} $&$ L\times L $&$ l\times L $\\
+        $ Q_{e2e} $&$ L\times L $&$ l\times l $\\
+        $ K $&$ L\times L $&$ L\times L $\\
+        $ K_e $&&$ l\times l $\\
+        $ V $&$ L\times L $&$ L\times L $\\
+        $ V_{w2e} $&&$ L\times l $\\
+        $ V_{e2w} $&&$ l\times L $\\
+        $ V_{e2e} $&&$ l\times l $\\
+    \end{tabular}
+    \caption{Comparison of the matrix dimensions in the transformer blocks of LUKE and DaLUKE.}
+    \label{tab:mats}
+\end{table}\noindent
 
 \section{Results}
 
