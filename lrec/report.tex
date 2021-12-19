@@ -52,7 +52,7 @@
 
 
 \abstract{
-    t
+    None
 \newline \Keywords{NLP, Transformers, Entity-based Learning}
 }
 
@@ -61,40 +61,49 @@
 \maketitleabstract
 
 \section{Introduction}
-The use of emerging languages technologies in industry has grown with positive impact in bussines and society, but this impact is largest in high-resource languages such as English motivating a focus on developing diverse methods for languages with much less available textual data \cite{hedderich2021survey}.
-Languages such as Danish, with around 6 million speakers, fall in a size class where NLP ressources and an NLP tradition exist but with data of so limited magnitude that models such as large-scale transformers underperform.
+The use of emerging language technologies in industry has grown along with positive impact in bussines and society. 
+Most of this impact is seen in high-resource languages such as English, motivating diverse methods for modeling languages with much less available textual data \cite{hedderich2021survey}.
+Languages such as Danish, with around 6 million speakers, fall in a size class where NLP ressources and an NLP tradition exist but where data is of a magnitude so limited that state-of-the-art (SOTA) models such as large-scale transformers underperform.
 In such domains, recent advances in combining explicit modeling of language knowledge with flexible SOTA models can be the key to get closer to the glory of the English-speaking models.
-DaLUKE is such an attempt, using the general model idea of LUKE \cite{yamada2020luke} and adding custom solutions for the case of Danish to measure the potential and applicability of this combination.
+DaLUKE is such an attempt, using the general model idea of LUKE (Language Understanding using Knowledge Embeddings) \cite{yamada2020luke} and adding custom solutions for the case of Danish to measure the potential and applicability of this combination.
 
+LUKE is a general-purpose, pretrained language model following the architecture of BERT but adding entity mentions, mined from Wikipedia, as token inputs to the transformer attention blocks, alongside words.
+The model beats existing word-based transformers on a number of entity-related fine-tuning tasks including Named Entity Recognition (NER) on the CoNLL-2003 benchmark \cite{yamada2020luke,tjang2003conll}.
 
-\subsection{Related Models}
+DaLUKE follows the approach of maintaining a vocabulary of known entities corresponding to the set of Wikipedia articles.
+The pretrained model is initialized to the weights of the multilingual RoBERTa \cite{conneau2020unsupervised} and trained on the Danish Wikipedia and Danish Gigaword Corpus (DAGW) \cite{derc2021giga}.
+Using this contextual word and entity representation model, a NER model is produced by fine-tuning on the primary Danish benchmark DaNE \cite{hvingelby2020dane}.
+We repeat this pretraining and fine-tuning procedure, modifying model architecture and data augmentations to uncover how the LUKE approach generalizes to a language with less than 5\%\ of the Wikipedia content pages.
+
+\subsection{Related Work}
 \paragraph{Knowledge-based Pretraining Augmentations}
-\begin{itemize}
-    \item KEPLER
-    \item WKLM
-    \item KALM
-    \item K-Adapter
-    \item KGpLM
-    \item KB-VLP
-    \item CoLAKE
-\end{itemize}
-\paragraph{Danish NLP}
-\begin{itemize}
-    \item DaBERT
-    \item DaCy
-\end{itemize}
+A direct way to use explicit knowledge is to maintain a separate representation of facts which can be incorporated into both pretraining and inference of deep language models.
 
+KnowBERT \cite{peters2019knowbert} achieves this by adding a component to BERT which allows information to be retrieved from multiple knowledge graphs (KG's) of different forms such as WordNET and Wikipedia and represented within the BERT encoder.
+Other knowledge-guided models attempt to learn such relational knowledge without the use of a separate, static KG.
+{WKLM, \cite{xiong2019wklm}, uses the English Wikipedia, taking hyperlinks to be entities.
+The authors train an unaltered BERT architecture jointly on MLM and on a task involving identifying the randomly replaced entity in a sequence.
+KALM, published after LUKE \cite{corby2020kalm}, also keeps the core language model architecture, in this case GPT-2, unchanged, adding a separate entity tokenizer and entity embedding layer for an entity prediction pretraining task.
+
+Newer models extend these joint word and entity approaches, with CoLAKE \cite{sun2020colake} injecting knowledge context of entity embeddings, and KB-VLP \cite{chen2021kb-vlp} extracting multimodal knowledge embeddings from combined image and text sources.
+
+\paragraph{Danish NLP}
+Previous Danish language models do not incorporate entity knowledge.
+The most significant, pretrained language model is in our estimation a Danish version of BERT, released by the company BotXO \cite{botxo2019dabert}.
+Another, more recent, Danish transformer is the adaption of the more resource-efficient language model Electra to Danish under the name Ælæctra \cite{bertelsen2020lctra}.
+An unpublished community attempt to produce a Danish version of RoBERTa was not succesful in outperforming the Danish BERT \cite{boye2021ing}.
+
+The SOTA in Danish NER is held by multilingual models \cite{danlp2021} with small performance differences between DaCy, a fine-tuned version of RoBERTa Large \cite{enevoldsen2020dacy}, and ScandiNER \cite{nielsen2021scandi}, using extra NER data from closely related languages.
 
 \section{Methods}
 
 \subsection{Pretraining}
 Six pretrained models are produced using various combinations of three variables.
-The experiments are listed in table \ref{tab:pretraining-experiments}.
+The experiments are listed in Table \ref{tab:pretraining-experiments}.
 The dual masked word-masked entity pretraining task from LUKE \cite{yamada2020luke} is used for pretraining all the models.
 \begin{table}[H]
-%    TODO Make table fit within column
     \centering
-    \footnotesize
+    \scriptsize
     \begin{tabular}{l|ccc}
         Experiment      &RoBERTa &Auto-annotated&Reduced entity	\\
         name&version&entities&dimensionality\\\hline
@@ -106,7 +115,7 @@ The dual masked word-masked entity pretraining task from LUKE \cite{yamada2020lu
         Large+auto      &Large   &$\checkmark$   &
     \end{tabular}
     \caption{Pretraining experiments.
-    Hyperparameters were kept constant across all and are listed in table \ref{tab:pretraining-hyperparameters}.}
+    Hyperparameters were kept constant across all and are listed in Table \ref{tab:pretraining-hyperparameters}.}
     \label{tab:pretraining-experiments}
 \end{table}\noindent
 \begin{table}[H]
@@ -130,7 +139,7 @@ The dual masked word-masked entity pretraining task from LUKE \cite{yamada2020lu
 \end{table}\noindent
 
 \paragraph{Dataset}
-The pretraining comes from two sources: The Danish Wikipedia and the Danish Gigaword Corpus (DAGW) \cite{derc2021giga}.
+The pretraining comes from two sources: The Danish Wikipedia and the DAGW \cite{derc2021giga}.
 DaLUKE follows LUKE's pretraining task, which is an extension of BERT's masked language modelling \cite{devlin2019bert} \cite{yamada2020luke}.
 For this, both a large text corpus and entity annotations are needed.
 While the Danish Wikipedia is rather limited, it does contain entity annotations unlike DAGW.
@@ -141,7 +150,7 @@ Furthermore, DAGW also contains a subset of the Common Crawl \cite{cc}.
 This was found to be of relatively low quality and so was removed.
 
 \paragraph{Auto-annotated entities}
-As with most low-resource languages, the Danish Wikipedia fairly small, and it is the only source of entity labels in the dataset.
+As with most low-resource languages, the Danish Wikipedia is fairly small, and it is the only source of entity labels in the dataset.
 Even though the full dataset contains more than 900 million words, the entities number only 4.7 million, or about one entity per 200 words.
 Auto-annotation is an attempt to remedy this.
 Using the entity vocabulary from Wikipedia, at every word start in the dataset it is checked if the next $ n $ characters match an entity (ignoring casing).
@@ -149,14 +158,14 @@ If so, all words covered, whole or partially, by the characters, and the cursor 
 To work, all $ n $ in an interval need to be checked.
 The lower bound is set to 5 to prevent too many wrong matches and the upper bound to 48 to limit runtime.
 While this algorithm is rather crude, it does increase the number of entities to 115 million.
-When inspecting some of the annotations, very few incorrect ones were found.
-An drawback of this method is that the characters need to match one-to-one, so there will be entities that are not annotated.
+When qualitatively inspecting some of the annotations, very few incorrect ones were found.
+A drawback of this method is that the characters need to match one-to-one, so there will be entities that are not annotated.
 
 \paragraph{Reduced entity dimensionality}
 LUKE models words and entities in the same $ L $ dimensional latent space \cite{yamada2020luke}.
 However, due to the lower number of entities and the simpler structure compared to words, we propose modelling them in a lower, $ l $ dimensional latent space.
 This requires adding some additional matrices in the attention blocks compared to LUKE and modifying others, causing the total number of parameters to drop (assuming that $ L $ is sufficiently larger than $ l $).
-Tabel \ref{tab:mats} shows all parameter matrices in LUKE and DaLUKE.
+Table \ref{tab:mats} shows all parameter matrices in LUKE and DaLUKE.
 \begin{table}[H]
     \centering
     \footnotesize
@@ -174,10 +183,10 @@ Tabel \ref{tab:mats} shows all parameter matrices in LUKE and DaLUKE.
         $ \mathbf V_{e2w} $&&$ l\times L $\\
         $ \mathbf V_{e2e} $&&$ l\times l $\\
     \end{tabular}
-    \caption{Comparison of the matrix dimensions in the transformer blocks of LUKE and DaLUKE.}
+    \caption{Comparison of the matrix dimensions in the transformer blocks of LUKE and DaLUKE. Cells are left out for LUKE, as these matrices are not needed when modeling word and entity tokens using same dimensionality.}
     \label{tab:mats}
 \end{table}\noindent
-Formally, a sequency of $ m $ word token representations of dimension $ L $ and $ n $ entity token representations of dimension $ l $ is structured as two matrices:
+Formally, a sequency of $ m $ word token representations of dimension $ L $ and $ n $ entity token representations of dimension $ l $ are structured as two matrices:
 \begin{align*}
     &\mathbf W = \begin{bmatrix}
         |&&|\\
@@ -206,7 +215,32 @@ Finally, the contextualized representations, $ \mathbf W_{c}\in\RR^{L\times m} $
 \end{align*}
 Notice that while the calculations in the attention blocks here are expressed as purely linear, e.g. $ \mathbf A\mathbf x $, all of the matrices also have a bias term, e.g. $ \mathbf A\mathbf x+\mathbf b $.
 These biases do not change any of the dimensionality considerations and have thus been left out for simplicity.
+In the experiments with reduced entity dimensionality, $l=252$ was used, otherwise $l=L$.
 
+\subsection{NER}
+The pretrained models were fine-tuned for NER on DaNE \cite{hvingelby2020dane}, consisting of 5512 sentences with word spans annotated as belonging to four named entity categories: PER(son), ORG(anisation), LOC(ation), MISC(ellaneous).
+The fine-tunings followed that of LUKE, by adding a five-class softmax output to the pretrained model and classifying each candidate entity as belonging to one of the four entity classes or being outside the entity scheme ("O").
+Each candidate entity was represented as the concatenation of the [MASK] entity representation over the span and the representations of the first and last words in the span. 
+The predefined splits of DaNE were used and the entire model was trained on the training split using the hyperparameters shown in Table \ref{tab:finetuning}.
+The model was evaluated on the test split consisting of 558 sentences, reporting the micro average of the class-wise F1 scores as the performance metric as done for the CoNLL-2003 benchmark \cite{tjang2003conll}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{l|r}
+        Parameter                       & Value\\\hline
+        Epochs                          & 15\\
+        Batch size                      & 8\\
+        Peak learning rate              & $5\ctp{-5}$\\
+        LR warmup steps proportion      & $ 6\pro $\\
+        Dropout (pretrained model)      & $ 0.1 $\\
+        Dropout (final, linear layer)   & $ 0.025 $\\
+        Weight decay                    & $ 0.01 $\\
+        %Loss weighting                  & No
+    \end{tabular}
+    \caption{Hyperparameters used for fine-tuning DaLUKE for on DaNE..}
+    \label{tab:finetuning}
+\end{table}\noindent
 \section{Results}
 
 \section{Discussion}
